@@ -3,6 +3,10 @@ import streamlit as st, pandas as pd, numpy as np, folium
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 import geopandas
+import plotly.express as px
+from datetime import datetime
+
+st.set_page_config(layout='wide')
 
 @st.cache(allow_output_mutation=True)
 # Lendo o arquivo para a construção do código
@@ -11,6 +15,7 @@ def get_data(path):
     return read_data
 
 
+@st.cache(allow_output_mutation=True)
 def get_geofile(url):
     read_geofile = geopandas.read_file(url)
     return read_geofile
@@ -19,7 +24,7 @@ def get_geofile(url):
 geofile = get_geofile('https://opendata.arcgis.com/datasets/83fc2e72903343aabff6de8cb445b81c_2.geojson')
 
 data = get_data('kc_house_data.csv')
-data['date'] = pd.to_datetime(data['date'])
+data['date'] = pd.to_datetime(data['date']).dt.strftime('%d-%m-%Y')
 data['Price_m²'] = data['price'] / (data["sqft_lot"] / 10.764)
 
 # Visão geral dos dados
@@ -100,7 +105,6 @@ data_statistc.dataframe(
 
 # Densidade de portfolio
 c1, c2 = st.beta_columns((1, 1))
-
 c1.header('Mapa densidade')
 
 df = data.sample(10)
@@ -117,20 +121,23 @@ for name, row in df.iterrows():
 with c1:
     folium_static(mapa)
 
+
 # Região por preço
 df = data[['price', 'zipcode']].groupby( 'zipcode' ).mean().reset_index()
+df.columns = ['ZIP', 'PRICE']
 df = df.sample(10)
-geofile = geofile[geofile['ZIP'].isin(df['zipcode'].tolist())]
+
+geofile = geofile[geofile['ZIP'].isin(df['ZIP'].tolist())]
 
 c2.header('Mapa Região')
 mapa_regiao = folium.Map(
     location=[data['lat'].mean(), data['long'].mean()],
-    zoom_start=10
+    zoom_start=15
 )
 mapa_regiao.choropleth(
     data=df,
     geo_data=geofile,
-    columns=['zipcode', 'price'],
+    columns=['ZIP', 'PRICE'],
     key_on='feature.properties.ZIP',
     fill_color='YlOrRd',
     fill_opacity=0.7,
