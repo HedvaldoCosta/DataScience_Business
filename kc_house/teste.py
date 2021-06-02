@@ -19,7 +19,7 @@ def get_data(path):
 
 
 data = get_data('kc_house_data.csv')
-data['date'] = pd.to_datetime(data['date']).dt.strftime('%d/%m/%Y')
+data['date'] = pd.to_datetime(data['date']).dt.strftime('%d-%m-%Y')
 data['price_m2'] = data['price'] / (data['sqft_lot'] / 10.764)
 
 
@@ -35,6 +35,8 @@ geofile = get_geofile('https://opendata.arcgis.com/datasets/83fc2e72903343aabff6
 st.title(body='KC_HOUSE')
 st.markdown(body='Welcome to kc house')
 
+geral, tendencia = st.beta_columns((1, 1))
+
 select_zipcode = st.sidebar.multiselect(
     label='Enter Zipcode',
     options=data['zipcode'].unique()
@@ -45,10 +47,11 @@ if select_zipcode:
 else:
     data = data.copy()
 
-st.header(body='Visão Geral')
-st.dataframe(
+
+geral.header(body='Visão Geral')
+geral.dataframe(
     data=data.head(10),
-    height=500
+    height=300
 )
 
 # Estatística Descritiva
@@ -60,5 +63,9 @@ min_value = pd.DataFrame(num_select.apply(np.min))
 
 dataframe_estat = pd.concat([media, std, max_value, min_value], axis=1).reset_index()
 dataframe_estat.columns = ['Attributes', 'averrage', 'std', 'max', 'min']
-st.write(dataframe_estat)
+tendencia.header(body='Tendência central')
+tendencia.dataframe(
+    data=dataframe_estat.head(10),
+    height=300
+)
 
