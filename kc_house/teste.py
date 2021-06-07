@@ -2,6 +2,9 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+import folium
+import streamlit_folium
+from folium.plugins import MarkerCluster
 
 st.set_page_config(
     layout='wide'
