@@ -6,14 +6,10 @@ import folium
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 
-st.set_page_config(
-    layout='wide'
-)
+st.set_page_config(layout='wide')
 
 
-@st.cache(
-    allow_output_mutation=True
-)
+@st.cache(allow_output_mutation=True)
 # Extração e transformação dos dados
 def get_data(path):
     read_path = pd.read_csv(path)
@@ -77,18 +73,27 @@ st.dataframe(
 )
 
 c1, c2 = st.beta_columns((1, 1))
-df = data.sample(100)
-density_map = folium.Map(
-    location=[data['lat'].mean(), data['long'].mean()]
-)
-marker_cluster = MarkerCluster().add_to(density_map)
-for name, row in df.iterrows():
-    folium.Marker(
-        location=[row['lat'], row['long']],
-        popup=f'''Price:R${row["price"]}
+
+is_mapa = st.checkbox('map')
+
+
+@st.cache(allow_output_mutation=True)
+def get_map(df):
+    density_map = folium.Map(
+        location=[df['lat'].mean(), df['long'].mean()]
+    )
+    marker_cluster = MarkerCluster().add_to(density_map)
+    for name, row in df.iterrows():
+        folium.Marker(
+            location=[row['lat'], row['long']],
+            popup=f'''Price:R${row["price"]}
 bedrooms: {row["bedrooms"]}
 bathrooms: {row["bathrooms"]}
 waterfront: {row["waterfront"]}'''
-    ).add_to(marker_cluster)
+        ).add_to(marker_cluster)
+    return density_map
+
+
 with c1:
-    folium_static(density_map)
+    if is_mapa:
+        folium_static(get_map(df=data))
