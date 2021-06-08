@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import folium
-import streamlit_folium
+from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 
 st.set_page_config(
@@ -76,3 +76,19 @@ st.dataframe(
     data=data.head()
 )
 
+c1, c2 = st.beta_columns((1, 1))
+df = data.sample(100)
+density_map = folium.Map(
+    location=[data['lat'].mean(), data['long'].mean()]
+)
+marker_cluster = MarkerCluster().add_to(density_map)
+for name, row in df.iterrows():
+    folium.Marker(
+        location=[row['lat'], row['long']],
+        popup=f'''Price:R${row["price"]}
+bedrooms: {row["bedrooms"]}
+bathrooms: {row["bathrooms"]}
+waterfront: {row["waterfront"]}'''
+    ).add_to(marker_cluster)
+with c1:
+    folium_static(density_map)
