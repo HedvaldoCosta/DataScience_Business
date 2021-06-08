@@ -78,12 +78,12 @@ is_mapa = st.checkbox('map')
 
 
 @st.cache(allow_output_mutation=True)
-def get_map(df):
+def get_map(dataframe):
     density_map = folium.Map(
-        location=[df['lat'].mean(), df['long'].mean()]
+        location=[dataframe['lat'].mean(), dataframe['long'].mean()]
     )
     marker_cluster = MarkerCluster().add_to(density_map)
-    for name, row in df.iterrows():
+    for name, row in dataframe.iterrows():
         folium.Marker(
             location=[row['lat'], row['long']],
             popup=f'''Price:R${row["price"]}
@@ -96,4 +96,4 @@ waterfront: {row["waterfront"]}'''
 
 with c1:
     if is_mapa:
-        folium_static(get_map(df=data))
+        folium_static(get_map(dataframe=data))
