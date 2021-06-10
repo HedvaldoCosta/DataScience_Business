@@ -18,9 +18,24 @@ def get_data(dataframe):
 
 
 @st.cache(allow_output_mutation=True)
-def get_map(dataframe):
+def get_url(geofile):
+    read_geofile = geopandas.read_file(filename=geofile)
+    return read_geofile
+
+
+@st.cache(allow_output_mutation=True)
+def get_map(dataframe, datageofile):
     density_map = folium.Map(
         location=[dataframe['lat'].mean(), dataframe['long'].mean()]
+    )
+    price_zipcode = dataframe[['price', 'zipcode']].groupby('zipcode').mean().reset_index()
+    filter_datageofile = datageofile[datageofile['ZIP'].isin(price_zipcode['zipcode'].tolist())]
+    density_map.choropleth(
+        data=price_zipcode,
+        geo_data=filter_datageofile,
+        columns=['zipcode', 'price'],
+        key_on='feature.properties.ZIP',
+        fill_color='YlOrRd'
     )
     marker_cluster = MarkerCluster().add_to(density_map)
     for name, row in dataframe.iterrows():
@@ -35,8 +50,7 @@ waterfront: {row["waterfront"]}'''
 
 
 data = get_data(dataframe='Datasets/kc_house_data.csv')
-#data_geofile = get_data(geofile='Datasets/Zip_codes.geojson')
-
+data_geofile = get_url(geofile='Datasets/Zip_Codes.geojson')
 # Remoção das colunas desnecessárias para o insight
 data = data.drop(columns=['sqft_above', 'sqft_basement', 'sqft_living15', 'sqft_lot15', 'yr_renovated'])
 # Formatando as colunas do data
@@ -101,4 +115,6 @@ is_mapa = st.checkbox('map')
 
 with c1:
     if is_mapa:
-        folium_static(get_map(dataframe=data))
+        folium_static(get_map(dataframe=data,
+                              datageofile=data_geofile)
+                      )
