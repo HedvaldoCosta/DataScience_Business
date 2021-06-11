@@ -1,11 +1,8 @@
 # Importação das bibliotecas
-import pandas as pd
-import numpy as np
-import streamlit as st
-import folium
+import pandas as pd, numpy as np, streamlit as st, folium, geopandas, plotly.express as px
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
-import geopandas
+from datetime import datetime
 
 st.set_page_config(layout='wide')
 
@@ -73,7 +70,8 @@ data['waterfront'] = data['waterfront'].apply(
 )
 # Retirando as linhas que possuem idade negativa
 data = data.drop(data[data['age'] < 0].index, axis=0)
-
+st.sidebar.title(body='Filter map')
+st.title(body='Dataset')
 # Filtros interativos
 filter_zipcode = st.sidebar.multiselect(
     label='Enter zipcode',
@@ -104,17 +102,64 @@ elif (filter_zipcode != []) & (filter_columns == []):
 else:
     data = data.copy()
 
-
 st.dataframe(
     data=data.head()
 )
 
 c1, c2 = st.beta_columns((1, 1))
 
-is_mapa = st.checkbox('map')
+is_map = st.checkbox('map')
 
 with c1:
-    if is_mapa:
+    if is_map:
         folium_static(get_map(dataframe=data,
                               datageofile=data_geofile)
                       )
+
+st.sidebar.title(body='Commerce filters')
+st.title(body='Commercial')
+
+g1, g2 = st.beta_columns((1, 1))
+
+min_yrbuilt = int(data['yr_built'].min())
+max_yrbuilt = int(data['yr_built'].max())
+filter_yrbuilt = st.sidebar.slider(label='Select Year Built',
+                                   min_value=min_yrbuilt,
+                                   max_value=max_yrbuilt,
+                                   value=min_yrbuilt
+                                   )
+g1.header(body='Average price for year built')
+df = data.loc[data['yr_built'] <= filter_yrbuilt]
+data_yrbuilt = df[['yr_built', 'price']].groupby('yr_built').mean().reset_index()
+fig_yrbuilt = px.line(
+    data_frame=data_yrbuilt,
+    x='yr_built',
+    y='price'
+)
+g1.plotly_chart(
+    figure_or_data=fig_yrbuilt,
+    use_container_width=True
+)
+
+g2.header(body='Average price for day')
+min_date = datetime.strptime(data['date'].min(), '%d-%m-%Y')
+max_date = datetime.strptime(data['date'].max(), '%d-%m-%Y')
+filter_date = st.sidebar.slider(
+    label='Select Date',
+    min_value=min_date,
+    max_value=max_date,
+    value=min_date
+)
+data['date'] = pd.to_datetime(data['date'])
+df = data.loc[data['date'] <= filter_date]
+data_date = df[['date', 'price']].groupby('date').mean().reset_index()
+fig_date = px.line(
+    data_frame=data_date,
+    x='date',
+    y='price'
+)
+g2.plotly_chart(
+    figure_or_data=fig_date,
+    use_container_width=True
+)
+
