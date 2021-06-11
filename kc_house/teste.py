@@ -163,3 +163,81 @@ g2.plotly_chart(
     use_container_width=True
 )
 
+st.title(body='House attributes')
+
+bedrooms1, bedrooms2 = st.beta_columns((2,2))
+
+bedrooms1.header(body='quantity bedrooms')
+data_bedrooms = data[['bedrooms', 'id']].groupby('bedrooms').count().reset_index()
+data_bedrooms.columns = ['bedrooms', 'quantity']
+fig_bedrooms = px.bar(
+    data_frame=data_bedrooms,
+    x='bedrooms',
+    y='quantity'
+)
+bedrooms1.plotly_chart(
+    figure_or_data=fig_bedrooms,
+    use_container_width=True
+)
+
+bedrooms2.header(body='Mean price bedrooms')
+data_bedrooms = data[['bedrooms', 'price']].groupby('bedrooms').mean().reset_index()
+fig_bedrooms = px.bar(
+    data_frame=data_bedrooms,
+    x='bedrooms',
+    y='price'
+)
+bedrooms2.plotly_chart(
+    figure_or_data=fig_bedrooms,
+    use_container_width=True
+)
+
+bathrooms1, bathrooms2 = st.beta_columns((2, 2))
+
+bathrooms1.header(body='quantity bathrooms')
+data_bathrooms = data[['bathrooms', 'id']].groupby('bathrooms').count().reset_index()
+data_bathrooms.columns = ['bathrooms', 'quantity']
+fig_bathrooms = px.bar(
+    data_frame=data_bathrooms,
+    x='bathrooms',
+    y='quantity'
+)
+bathrooms1.plotly_chart(
+    figure_or_data=fig_bathrooms,
+    use_container_width=True
+)
+bathrooms2.header(body='Mean price bathrooms')
+data_bathrooms = data[['bathrooms', 'price']].groupby('bathrooms').mean().reset_index()
+fig_bathrooms = px.bar(
+    data_frame=data_bathrooms,
+    x='bathrooms',
+    y='price'
+)
+bathrooms2.plotly_chart(
+    figure_or_data=fig_bathrooms,
+    use_container_width=True
+)
+
+floor1, floor2 = st.beta_columns((2, 2))
+floor1.header(body='Quantity floors')
+data_floor = data[['floors', 'id']].groupby('floors').count().reset_index()
+data_floor.columns = ['floors', 'Quantity']
+fig_floor = px.bar(
+    data_frame=data_floor,
+    x='floors',
+    y='Quantity'
+)
+floor1.plotly_chart(
+    figure_or_data=fig_floor,
+    use_container_width=True
+)
+floor2.header(body='Mean price floors')
+data_floor = data[['floors', 'price']].groupby('floors').mean().reset_index()
+fig_floor = px.bar(
+    data_frame=data_floor,
+    x='floors',
+    y='price'
+)
+floor2.plotly_chart(
+    figure_or_data=fig_floor,
+    use_container_width=True)
