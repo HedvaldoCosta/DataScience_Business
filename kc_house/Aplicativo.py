@@ -11,12 +11,14 @@ st.set_page_config(layout='wide')
 @st.cache(allow_output_mutation=True)
 def get_data(dataframe):
     read_path = pd.read_csv(filepath_or_buffer=dataframe)
+
     return read_path
 
 
 @st.cache(allow_output_mutation=True)
 def get_url(geofile):
     read_geofile = geopandas.read_file(filename=geofile)
+
     return read_geofile
 
 
@@ -43,14 +45,15 @@ bedrooms: {row["bedrooms"]}
 bathrooms: {row["bathrooms"]}
 waterfront: {row["waterfront"]}'''
         ).add_to(marker_cluster)
+
     return density_map
 
 
 data = get_data(dataframe='Datasets/kc_house_data.csv')
 data_geofile = get_url(geofile='Datasets/Zip_Codes.geojson')
-# Remoção das colunas desnecessárias para o insight
+
 data = data.drop(columns=['sqft_above', 'sqft_basement', 'sqft_living15', 'sqft_lot15', 'yr_renovated'])
-# Formatando as colunas do data
+
 data['date'] = pd.to_datetime(data['date']).dt.strftime('%d-%m-%Y')
 data['year'] = np.int64(pd.to_datetime(data['date']).dt.strftime('%Y'))
 data['age'] = data['year'] - data['yr_built']
@@ -68,58 +71,61 @@ data['level'] = data['price'].apply(
 data['waterfront'] = data['waterfront'].apply(
     lambda x: 'no' if x == 0 else 'yes'
 )
-# Retirando as linhas que possuem idade negativa
 data = data.drop(data[data['age'] < 0].index, axis=0)
-st.sidebar.title(body='Filter map')
+
+# Filtros Dataset
+st.sidebar.title(body='Filter Dataset')
 st.title(body='Dataset')
-# Filtros interativos
+
+dataset = data.copy()
 filter_zipcode = st.sidebar.multiselect(
     label='Enter zipcode',
-    options=data['zipcode'].unique()
+    options=dataset['zipcode'].unique()
 )
 filter_columns = st.sidebar.multiselect(
     label='Enter columns',
-    options=data.columns
+    options=dataset.columns
 )
-filter_waterfront = st.sidebar.selectbox(label='Waterfront',
-                                         options=data['waterfront'].unique())
-filter_price = st.sidebar.slider(label='price',
-                                 min_value=75000,
-                                 max_value=7700000,
-                                 step=1
-                                 )
 
-if (filter_waterfront != []) & (filter_columns == []):
-    data = data.loc[data['waterfront'].isin([filter_waterfront]), :]
-elif (filter_waterfront != []) & (filter_columns != []):
-    data = data.loc[data['waterfront'].isin([filter_waterfront]), filter_columns]
-elif (filter_zipcode != []) & (filter_columns != []):
-    data = data.loc[data['zipcode'].isin(filter_zipcode), filter_columns]
-elif (filter_zipcode == []) & (filter_columns != []):
-    data = data.loc[:, filter_columns]
+if (filter_zipcode != []) & (filter_columns != []):
+    dataset = dataset.loc[dataset['zipcode'].isin(filter_zipcode), filter_columns]
 elif (filter_zipcode != []) & (filter_columns == []):
-    data = data.loc[data['zipcode'].isin(filter_zipcode), :]
+    dataset = dataset.loc[dataset['zipcode'].isin(filter_zipcode), :]
+elif (filter_zipcode == []) & (filter_columns != []):
+    dataset = dataset.loc[:, filter_columns]
 else:
-    data = data.copy()
+    dataset = dataset.copy()
 
-st.dataframe(
-    data=data.head()
-)
+st.dataframe(data=dataset)
 
-c1, c2 = st.beta_columns((1, 1))
-
+# Filtros do mapa
+data_map = data.copy()
+st.sidebar.title(body='Filter Map')
+filter_waterfront = st.sidebar.selectbox(label='Waterfront',
+                                         options=data_map['waterfront'].unique())
+filter_price = st.sidebar.slider(label='price',
+                                 min_value=int(data_map['price'].min()),
+                                 max_value=int(data_map['price'].max()),
+                                 step=1,
+                                 value=int(data_map['price'].mean())
+                                 )
+if filter_waterfront:
+    data_map = data_map.loc[data_map['waterfront'].isin([filter_waterfront])]
+if filter_price:
+    data_map = data_map.loc[data_map['price'] <= filter_price]
+mapa1, c2 = st.beta_columns((4, 1))
 is_map = st.checkbox('map')
-
-with c1:
+with mapa1:
     if is_map:
-        folium_static(get_map(dataframe=data,
-                              datageofile=data_geofile)
-                      )
+        folium_static(
+            get_map(dataframe=data_map,
+                    datageofile=data_geofile)
+        )
 
 st.sidebar.title(body='Commerce filters')
 st.title(body='Commercial')
 
-g1, g2 = st.beta_columns((1, 1))
+g1, g2 = st.beta_columns((3, 3))
 
 min_yrbuilt = int(data['yr_built'].min())
 max_yrbuilt = int(data['yr_built'].max())
@@ -164,11 +170,28 @@ g2.plotly_chart(
 )
 
 st.title(body='House attributes')
-
-bedrooms1, bedrooms2 = st.beta_columns((2,2))
+st.sidebar.title(body='House filters')
+# Filters
+filter_bedrooms = st.sidebar.multiselect(
+    label='Select bedrooms',
+    options=sorted(set(data['bedrooms'].unique()))
+)
+filter_bathrooms = st.sidebar.multiselect(
+    label='Select bathrooms',
+    options=sorted(set(data['bathrooms'].unique()))
+)
+filter_floors = st.sidebar.multiselect(
+    label='Select floors',
+    options=sorted(set(data['floors'].unique()))
+)
+bedrooms1, bedrooms2 = st.beta_columns((3, 3))
 
 bedrooms1.header(body='quantity bedrooms')
-data_bedrooms = data[['bedrooms', 'id']].groupby('bedrooms').count().reset_index()
+if filter_bedrooms:
+    df = data[data['bedrooms'].isin(filter_bedrooms)]
+else:
+    df = data.copy()
+data_bedrooms = df[['bedrooms', 'id']].groupby('bedrooms').count().reset_index()
 data_bedrooms.columns = ['bedrooms', 'quantity']
 fig_bedrooms = px.bar(
     data_frame=data_bedrooms,
@@ -181,7 +204,7 @@ bedrooms1.plotly_chart(
 )
 
 bedrooms2.header(body='Mean price bedrooms')
-data_bedrooms = data[['bedrooms', 'price']].groupby('bedrooms').mean().reset_index()
+data_bedrooms = df[['bedrooms', 'price']].groupby('bedrooms').mean().reset_index()
 fig_bedrooms = px.bar(
     data_frame=data_bedrooms,
     x='bedrooms',
@@ -192,10 +215,14 @@ bedrooms2.plotly_chart(
     use_container_width=True
 )
 
-bathrooms1, bathrooms2 = st.beta_columns((2, 2))
+bathrooms1, bathrooms2 = st.beta_columns((3, 3))
 
 bathrooms1.header(body='quantity bathrooms')
-data_bathrooms = data[['bathrooms', 'id']].groupby('bathrooms').count().reset_index()
+if filter_bathrooms:
+    df = data[data['bathrooms'].isin(filter_bathrooms)]
+else:
+    df = data.copy()
+data_bathrooms = df[['bathrooms', 'id']].groupby('bathrooms').count().reset_index()
 data_bathrooms.columns = ['bathrooms', 'quantity']
 fig_bathrooms = px.bar(
     data_frame=data_bathrooms,
@@ -207,7 +234,7 @@ bathrooms1.plotly_chart(
     use_container_width=True
 )
 bathrooms2.header(body='Mean price bathrooms')
-data_bathrooms = data[['bathrooms', 'price']].groupby('bathrooms').mean().reset_index()
+data_bathrooms = df[['bathrooms', 'price']].groupby('bathrooms').mean().reset_index()
 fig_bathrooms = px.bar(
     data_frame=data_bathrooms,
     x='bathrooms',
@@ -218,9 +245,13 @@ bathrooms2.plotly_chart(
     use_container_width=True
 )
 
-floor1, floor2 = st.beta_columns((2, 2))
+floor1, floor2 = st.beta_columns((3, 3))
 floor1.header(body='Quantity floors')
-data_floor = data[['floors', 'id']].groupby('floors').count().reset_index()
+if filter_floors:
+    df = data[data['floors'].isin(filter_floors)]
+else:
+    df = data.copy()
+data_floor = df[['floors', 'id']].groupby('floors').count().reset_index()
 data_floor.columns = ['floors', 'Quantity']
 fig_floor = px.bar(
     data_frame=data_floor,
@@ -232,7 +263,7 @@ floor1.plotly_chart(
     use_container_width=True
 )
 floor2.header(body='Mean price floors')
-data_floor = data[['floors', 'price']].groupby('floors').mean().reset_index()
+data_floor = df[['floors', 'price']].groupby('floors').mean().reset_index()
 fig_floor = px.bar(
     data_frame=data_floor,
     x='floors',
