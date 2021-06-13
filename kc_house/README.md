@@ -6,11 +6,15 @@
 
 ## Objetivo
 Utilizar a análise e manipulação de dados para auxiliar na tomada de decisões do time de negócios de uma empresa de imóveis denominada como Kc House
-
+ 
 ## Questão de negócio
 <p>Kc House é uma empresa de imóveis que deseja comprar casas, para poder reformá-las e depois vendê-las, na cidade de Seattle.</p>
 <p>O CEO da empresa deseja um relatório com as melhores casas para a compra com o seu preço e o porquê, após a compra é necessário relatar qual seria o melhor momento para a venda do imóvel e o quanto de lucro o imóvel arrecadaria.</p>
 
+| compra  | venda  |   
+|---|---|
+| compra > mediana  | valor da compra + 30%  |  
+|  compra < mediana | valor da compra + 10%  |  
 
 ## Premissas de negócio
 * Casas beira-mar possuem um preço maior de venda
@@ -20,3 +24,4 @@ Utilizar a análise e manipulação de dados para auxiliar na tomada de decisõe
 * Extração dos dados: Dataset retirado de: (https://www.kaggle.com/shivachandel/kc-house-data)
 * Análise dos dados: Limpeza e transformação dos dados com o objetivo de encontrar informações úteis e construir insights para a resolução do problema
 * Seleção de recursos: Selecionando os melhores atributos para a construção do relatório utilizando mapa e filtros
+* Publicação: Publicação do relatório no Heroku
