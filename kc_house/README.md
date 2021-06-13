@@ -5,20 +5,18 @@
 </p>
 
 ## Objetivo
-  Utilizar a análise e manipulação de dados para auxiliar na tomada de decisões do time de negócios de uma empresa de imóveis denominada como KC HOUSE
-## Resumo
-- Você faz parte de uma empresa chamada HOUSE ROCKET e lhe foi pedido para que ache uma forma de demonstrar o melhor imóvel para a compra
-- Site do dataset: ( https://www.kaggle.com/shivachandel/kc-house-data )
+Utilizar a análise e manipulação de dados para auxiliar na tomada de decisões do time de negócios de uma empresa de imóveis denominada como Kc House
+
 ## Questão de negócio
-* Quais são os melhores imóveis para comprar e por qual preço na cidade de Seattle?
-* Uma vez comprado, qual seria o melhor momento para reformá-lo, vendê-lo e por qual preço?
-
-## Entendimento de negócio
-### Produto final
-  * Entregar um dashboard com as sugestões para a compra dos imóveis
-### Ferramentas utilizadas
-  * python 3.8
-  * pycharm
-  * jupyter notebook
+<p>Kc House é uma empresa de imóveis que deseja comprar casas, para poder reformá-las e depois vendê-las, na cidade de Seattle.</p>
+<p>O CEO da empresa deseja um relatório com as melhores casas para a compra com o seu preço e o porquê, após a compra é necessário relatar qual seria o melhor momento para a venda do imóvel e o quanto de lucro o imóvel arrecadaria.</p>
 
 
+## Premissas de negócio
+* Casas beira-mar possuem um preço maior de venda
+* Casas com número de quartos igual a 0 ou maior do que 10 devem ser excluídas do dataset
+
+## Planejamento da solução
+* Extração dos dados: Dataset retirado de: (https://www.kaggle.com/shivachandel/kc-house-data)
+* Análise dos dados: Limpeza e transformação dos dados com o objetivo de encontrar informações úteis e construir insights para a resolução do problema
+* Seleção de recursos: Selecionando os melhores atributos para a construção do relatório utilizando mapa e filtros
