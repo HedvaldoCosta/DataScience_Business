@@ -25,3 +25,12 @@ Utilizar a análise e manipulação de dados para auxiliar na tomada de decisõe
 * Análise dos dados: Limpeza e transformação dos dados com o objetivo de encontrar informações úteis e construir insights para a resolução do problema
 * Seleção de recursos: Selecionando os melhores atributos para a construção do relatório utilizando mapa e filtros
 * Publicação: Publicação do relatório no Heroku
+
+## Principais insights
+* O zipcode com a maior média de preços é o 98103 por possuir mais imóveis beira-mar
+<p>Falso: O zipcode com maior média de preços é o 98039</p>
+
+* Casas com a condição nível 3 são a maioria entre os imóveis
+
+* Casas mais novas são mais caras do que antigas
+<p>Falso: A média de preços entre casas antigas e novas é muito variada para achar uma afirmação</p>
