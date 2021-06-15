@@ -1,9 +1,8 @@
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/67663958/121273913-b2cbfb80-c89f-11eb-9510-7e62cce964b0.PNG" width="310" />
-  <img src="https://user-images.githubusercontent.com/67663958/121530196-8fa26880-c9d3-11eb-92f2-4ed67f1e9728.PNG" width="310" /> 
-  <img src="https://user-images.githubusercontent.com/67663958/121273956-c5decb80-c89f-11eb-86af-c452e5d5526d.PNG" width="310" />
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/67663958/122058746-4fbbf680-cdc2-11eb-9da7-8853ecf8894e.gif" width="600" />
 </p>
 
+### Link para o aplicativo: (https://insight-project-rocket-house.herokuapp.com/)
 ## Objetivo
 Utilizar a análise e manipulação de dados para auxiliar na tomada de decisões do time de negócios de uma empresa de imóveis denominada como Kc House
  
@@ -11,7 +10,7 @@ Utilizar a análise e manipulação de dados para auxiliar na tomada de decisõe
 <p>Kc House é uma empresa de imóveis que deseja comprar casas, para poder reformá-las e depois vendê-las, na cidade de Seattle.</p>
 <p>O CEO da empresa deseja um relatório com as melhores casas para a compra com o seu preço e o porquê, após a compra é necessário relatar qual seria o melhor momento para a venda do imóvel e o quanto de lucro o imóvel arrecadaria.</p>
 
-| compra  | venda  |   
+| compras  | vendas  |   
 |---|---|
 | compra > mediana  | valor da compra + 30%  |  
 |  compra < mediana | valor da compra + 10%  |  
