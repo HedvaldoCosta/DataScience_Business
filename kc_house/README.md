@@ -12,8 +12,8 @@ Utilizar a análise e manipulação de dados para auxiliar na tomada de decisõe
 
 | compras  | vendas  |   
 |---|---|
-| compra > mediana  | valor da compra + 30%  |  
-|  compra < mediana | valor da compra + 10%  |  
+| compras > mediana  | valor da compra + 30%  |  
+|  compras < mediana | valor da compra + 10%  |  
 
 ## Premissas de negócio
 * Casas beira-mar possuem um preço maior de venda
