@@ -52,8 +52,24 @@ def load_data():
 
 
 def load_map(data_map):
+    """
+    :param data_map: Dataset que irá filtrar as informações do mapa
+    :return: Mapa com os filtros
+    """
     mapa = folium.Map(location=[data_map['latitude'].mean(), data_map['longitude'].mean()])
-    
+    marker_cluster = MarkerCluster().add_to(mapa)
+    for name, row in data_map.iterrows():
+        folium.Marker(location=[row['latitude'], row['longitude']],
+                      popup=f'''ID: {row["ID"]}
+preço: {row["preço"]}
+quartos: {row["quartos"]}
+banheiros: {row["banheiros"]}
+andares: {row["andares"]}
+area: {row["area M2"]}
+idade: {row["idade"]}
+''').add_to(marker_cluster)
+
+    return folium_static(mapa)
 
 
 # Carregar dados
@@ -82,6 +98,11 @@ filter_bathrooms = st.sidebar.multiselect('Banheiros', sorted(set(commercial_dat
 filter_floors = st.sidebar.multiselect('Andares', sorted(set(commercial_data['andares'].unique().tolist())))
 
 # APLICAÇÃO DOS FILTROS
+## FILTROS MAPA
+if filter_waterfront:
+    map_data = map_data.loc[map_data['beira_mar'].isin([filter_waterfront])]
+elif filter_price:
+    map_data = map_data.loc[map_data['preço'] <= filter_price]
 ## FILTROS DATASET
 if (filter_cep != []) & (filter_columns != []):
     df_data = df_data.loc[df_data['CEP'].isin(filter_cep), filter_columns]
@@ -89,11 +110,6 @@ elif (filter_cep != []) & (filter_columns == []):
     df_data = df_data.loc[df_data['CEP'].isin(filter_cep), :]
 elif (filter_cep == []) & (filter_columns != []):
     df_data = df_data.loc[:, filter_columns]
-## FILTROS MAPA
-if filter_waterfront:
-    map_data = map_data.loc[map_data['beira_mar'].isin([filter_waterfront])]
-elif filter_price:
-    map_data = map_data.loc[map_data['preço'] <= filter_price]
 ## FILTROS COMERCIAIS
 df_yrbuilt = read_data.copy()
 yr_built = df_yrbuilt.loc[df_yrbuilt['ano_construção'] <= filter_yr_built]
