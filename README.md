@@ -1,3 +1,2 @@
 # projetos de insight
- **Projetos voltados para a resolução de problemas da parte de negócios**
- ### Sem titanic por aqui...:ship:
+ **Aplicação de insights para a resolução de problemas, principalmente da área de negócios e logística**
