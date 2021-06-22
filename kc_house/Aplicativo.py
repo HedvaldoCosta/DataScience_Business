@@ -1,248 +1,166 @@
-import pandas as pd, numpy as np, streamlit as st, folium, geopandas, plotly.express as px
+import pandas as pd
+import streamlit as st
+import numpy as np
+import plotly.express as px
+import folium
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 
-
-@st.cache(allow_output_mutation=True)
-def get_data(path):
-    read_data = pd.read_csv(path)
-    read_data = read_data.drop(columns=['sqft_above', 'sqft_basement', 'sqft_living15', 'sqft_lot15', 'yr_renovated'])
-
-    read_data['date'] = pd.to_datetime(read_data['date']).dt.strftime('%d-%m-%Y')
-    read_data['year'] = np.int64(pd.to_datetime(read_data['date']).dt.strftime('%Y'))
-    read_data['age'] = read_data['year'] - read_data['yr_built']
-
-    read_data['bathrooms'] = np.int64(round(read_data['bathrooms'] - 0.3))
-    read_data['floors'] = np.int64(round(read_data['floors'] - 0.3))
-    read_data['sqft_living'] = round(read_data['sqft_living'] / 10.764, 2)
-    read_data['price'] = np.int64(read_data['price'])
-    read_data['level'] = read_data['price'].apply(
-        lambda x: 0 if (x >= 0) & (x < 321950) else
-        1 if (x >= 321950) & (x < 450000) else
-        2 if (x >= 450000) & (x < 645000) else
-        3
-    )
-    read_data['waterfront'] = read_data['waterfront'].apply(
-        lambda x: 'no' if x == 0 else 'yes'
-    )
-    read_data = read_data.drop(read_data[read_data['age'] < 0].index, axis=0)
-    return read_data
+data = 'Datasets/kc_house_data.csv'
 
 
-@st.cache(allow_output_mutation=True)
-def get_geofile(url):
-    read_geofile = geopandas.read_file(url)
-    return read_geofile
+@st.cache
+def load_data():
+    """
+    Carrega os dados dos imóveis
 
+    :return: Dataframe com as colunas já limpas
+    """
+    columns = {
+        'id': 'ID',
+        'date': 'data',
+        'price': 'preço',
+        'bedrooms': 'quartos',
+        'bathrooms': 'banheiros',
+        'sqft_living': 'area M2',
+        'floors': 'andares',
+        'waterfront': 'beira_mar',
+        'yr_built': 'ano_construção',
+        'zipcode': 'CEP',
+        'lat': 'latitude',
+        'long': 'longitude',
+        'level': 'level',
+        'idade': 'idade'
+    }
+    dataframe = pd.read_csv(data)
+    dataframe = dataframe.rename(columns=columns)
 
-@st.cache(allow_output_mutation=True)
-def filter_dataset(dataframe, filter1, filter2):
-    if (filter1 != []) & (filter2 != []):
-        dataframe = dataframe.loc[dataframe['zipcode'].isin(filter_zipcode), filter_columns]
-    elif (filter1 != []) & (filter2 == []):
-        dataframe = dataframe.loc[dataframe['zipcode'].isin(filter_zipcode), :]
-    elif (filter1 == []) & (filter2 != []):
-        dataframe = dataframe.loc[:, filter_columns]
-    else:
-        dataframe = dataframe.copy()
+    dataframe['data'] = pd.to_datetime(dataframe['data']).dt.strftime('%d-%m-%Y')
+    dataframe['banheiros'] = np.int64(round(dataframe['banheiros'] - 0.3))
+    dataframe['andares'] = np.int64(round(dataframe['andares'] - 0.3))
+    dataframe['beira_mar'] = dataframe['beira_mar'].apply(lambda x: 'SIM' if x == 1 else 'NÃO')
+    dataframe['level'] = dataframe['preço'].apply(lambda x: 1 if (x >= 75000) & (x < 321950) else
+                                                            2 if (x >= 321950) & (x < 568900) else
+                                                            3 if (x >= 568900) & (x < 815850) else
+                                                            4 if (x >= 815850) & (x < 1062800) else
+                                                            5)
+    dataframe['ano'] = np.int64(pd.to_datetime(dataframe['data']).dt.strftime('%Y'))
+    dataframe['idade'] = dataframe['ano'] - dataframe['ano_construção']
+    dataframe = dataframe[list(columns.values())]
 
     return dataframe
 
 
-@st.cache(allow_output_mutation=True)
-def get_map(dataframe, df_choropleth, filter_choropleth, filter1, filter2):
-    if filter1:
-        dataframe = dataframe.loc[dataframe['waterfront'].isin([filter_waterfront])]
-    if filter2:
-        dataframe = dataframe.loc[dataframe['price'] <= filter_price]
-    mapa = folium.Map(
-        location=[dataframe['lat'].mean(), dataframe['long'].mean()]
-    )
-    mapa.choropleth(
-        data=df_choropleth,
-        geo_data=filter_choropleth,
-        columns=['zipcode', 'price'],
-        key_on='feature.properties.ZIP',
-        fill_color='YlOrRd'
-    )
+def load_map(data_map):
+    """
+    :param data_map: Dataset que irá filtrar as informações do mapa
+    :return: Mapa com os filtros
+    """
+    mapa = folium.Map(location=[data_map['latitude'].mean(), data_map['longitude'].mean()])
     marker_cluster = MarkerCluster().add_to(mapa)
-    for name, row in dataframe.iterrows():
-        folium.Marker(
-            location=[row['lat'], row['long']],
-            popup=f'''Price:R${row["price"]}
-bedrooms: {row["bedrooms"]}
-bathrooms: {row["bathrooms"]}
-waterfront: {row["waterfront"]}
-Price_M2: {row["sqft_living"]}
-level: {row["level"]}
-age: {row["age"]}'''
-        ).add_to(marker_cluster)
+    for name, row in data_map.iterrows():
+        folium.Marker(location=[row['latitude'], row['longitude']],
+                      popup=f'''ID: {row["ID"]}
+preço: {row["preço"]}
+quartos: {row["quartos"]}
+banheiros: {row["banheiros"]}
+andares: {row["andares"]}
+area: {row["area M2"]}
+idade: {row["idade"]}
+''').add_to(marker_cluster)
 
-    return mapa
-
-
-def filter_commercial():
-    st.title(body='Commerce options')
-    st.sidebar.title(body='Commerce filters')
-
-    min_yrbuilt = int(data['yr_built'].min())
-    max_yrbuilt = int(data['yr_built'].max())
-    filter_yrbuilt = st.sidebar.slider(label='Select Year Built',
-                                       min_value=min_yrbuilt,
-                                       max_value=max_yrbuilt,
-                                       value=min_yrbuilt
-                                       )
-    st.header(body='Average price for year built')
-    df1 = data.loc[data['yr_built'] <= filter_yrbuilt]
-    data_yrbuilt = df1[['yr_built', 'price']].groupby('yr_built').mean().reset_index()
-    fig_yrbuilt = px.line(
-        data_frame=data_yrbuilt,
-        x='yr_built',
-        y='price'
-    )
-    st.plotly_chart(
-        figure_or_data=fig_yrbuilt,
-        use_container_width=True
-    )
-
-    filter_bedrooms = st.sidebar.multiselect(
-        label='Select bedrooms',
-        options=sorted(set(data['bedrooms'].unique()))
-    )
-    bedrooms1, bedrooms2 = st.beta_columns((5, 5))
-
-    bedrooms1.header(body='quantity bedrooms')
-    if filter_bedrooms:
-        df_bedrooms = data[data['bedrooms'].isin(filter_bedrooms)]
-    else:
-        df_bedrooms = data.copy()
-    data_bedrooms = df_bedrooms[['bedrooms', 'id']].groupby('bedrooms').count().reset_index()
-    data_bedrooms.columns = ['bedrooms', 'quantity']
-    fig_bedrooms = px.bar(
-        data_frame=data_bedrooms,
-        x='bedrooms',
-        y='quantity'
-    )
-    bedrooms1.plotly_chart(
-        figure_or_data=fig_bedrooms,
-        use_container_width=True
-    )
-    bedrooms2.header(body='Mean price bedrooms')
-    data_bedrooms = df_bedrooms[['bedrooms', 'price']].groupby('bedrooms').mean().reset_index()
-    fig_bedrooms = px.bar(
-        data_frame=data_bedrooms,
-        x='bedrooms',
-        y='price'
-    )
-    bedrooms2.plotly_chart(
-        figure_or_data=fig_bedrooms,
-        use_container_width=True
-    )
-
-    filter_bathrooms = st.sidebar.multiselect(
-        label='Select bathrooms',
-        options=sorted(set(data['bathrooms'].unique()))
-    )
-    bathrooms1, bathrooms2 = st.beta_columns((3, 3))
-
-    bathrooms1.header(body='quantity bathrooms')
-    if filter_bathrooms:
-        df_bathrooms = data[data['bathrooms'].isin(filter_bathrooms)]
-    else:
-        df_bathrooms = data.copy()
-    data_bathrooms = df_bathrooms[['bathrooms', 'id']].groupby('bathrooms').count().reset_index()
-    data_bathrooms.columns = ['bathrooms', 'quantity']
-    fig_bathrooms = px.bar(
-        data_frame=data_bathrooms,
-        x='bathrooms',
-        y='quantity'
-    )
-    bathrooms1.plotly_chart(
-        figure_or_data=fig_bathrooms,
-        use_container_width=True
-    )
-    bathrooms2.header(body='Mean price bathrooms')
-    data_bathrooms = df_bathrooms[['bathrooms', 'price']].groupby('bathrooms').mean().reset_index()
-    fig_bathrooms = px.bar(
-        data_frame=data_bathrooms,
-        x='bathrooms',
-        y='price'
-    )
-    bathrooms2.plotly_chart(
-        figure_or_data=fig_bathrooms,
-        use_container_width=True
-    )
-
-    filter_floors = st.sidebar.multiselect(
-        label='Select floors',
-        options=sorted(set(data['floors'].unique()))
-    )
-    floor1, floor2 = st.beta_columns((3, 3))
-    floor1.header(body='Quantity floors')
-    if filter_floors:
-        df_floors = data[data['floors'].isin(filter_floors)]
-    else:
-        df_floors = data.copy()
-    data_floor = df_floors[['floors', 'id']].groupby('floors').count().reset_index()
-    data_floor.columns = ['floors', 'Quantity']
-    fig_floor = px.bar(
-        data_frame=data_floor,
-        x='floors',
-        y='Quantity'
-    )
-    floor1.plotly_chart(
-        figure_or_data=fig_floor,
-        use_container_width=True
-    )
-    floor2.header(body='Mean price floors')
-    data_floor = df_floors[['floors', 'price']].groupby('floors').mean().reset_index()
-    fig_floor = px.bar(
-        data_frame=data_floor,
-        x='floors',
-        y='price'
-    )
-    floor2.plotly_chart(
-        figure_or_data=fig_floor,
-        use_container_width=True)
+    return folium_static(mapa)
 
 
-if __name__ == '__main__':
-    data = get_data(path='Datasets/kc_house_data.csv')
+# Carregar dados
+read_data = load_data()
 
-    geofile = get_geofile(url='Datasets/Zip_Codes.geojson')
+# SIDEBAR
+## SIDEBAR DATASET
+df_data = read_data.copy()
+st.sidebar.title('Filtros da tabela')
+filter_columns = st.sidebar.multiselect('Selecione as colunas', df_data.columns)
+filter_cep = st.sidebar.multiselect('Selecione os CEPS', df_data['CEP'].unique().tolist())
+## SIDEBAR MAPA
+map_data = read_data.copy()
+st.sidebar.title('Filtros do mapa')
+filter_waterfront = st.sidebar.selectbox('Beira-Mar', map_data['beira_mar'].unique().tolist())
+filter_price = st.sidebar.slider('Preço', int(map_data['preço'].min()), int(map_data['preço'].max()),
+                                 int(map_data['preço'].mean()))
+## SIDEBAR COMERCIAL
+commercial_data = read_data.copy()
+st.sidebar.title('Filtros comerciais')
+filter_yr_built = st.sidebar.slider('Ano de construção', int(commercial_data['ano_construção'].min()),
+                                    int(commercial_data['ano_construção'].max()),
+                                    int(commercial_data['ano_construção'].mean()))
+filter_bedrooms = st.sidebar.multiselect('Quartos', sorted(set(commercial_data['quartos'].unique().tolist())))
+filter_bathrooms = st.sidebar.multiselect('Banheiros', sorted(set(commercial_data['banheiros'].unique().tolist())))
+filter_floors = st.sidebar.multiselect('Andares', sorted(set(commercial_data['andares'].unique().tolist())))
 
-    df = data.copy()
-    st.sidebar.title(body='Filter Dataset')
-    st.title(body='Dataset')
-    filter_zipcode = st.sidebar.multiselect(
-        label='Select Zipcode',
-        options=df['zipcode'].unique()
-    )
-    filter_columns = st.sidebar.multiselect(
-        label='Enter columns',
-        options=df.columns
-    )
-    filtros_dataset = filter_dataset(dataframe=df, filter1=filter_zipcode, filter2=filter_columns)
-    st.dataframe(filtros_dataset)
+# APLICAÇÃO DOS FILTROS
+## FILTROS MAPA
+if filter_waterfront:
+    map_data = map_data.loc[map_data['beira_mar'].isin([filter_waterfront])]
+elif filter_price:
+    map_data = map_data.loc[map_data['preço'] <= filter_price]
+## FILTROS DATASET
+if (filter_cep != []) & (filter_columns != []):
+    df_data = df_data.loc[df_data['CEP'].isin(filter_cep), filter_columns]
+elif (filter_cep != []) & (filter_columns == []):
+    df_data = df_data.loc[df_data['CEP'].isin(filter_cep), :]
+elif (filter_cep == []) & (filter_columns != []):
+    df_data = df_data.loc[:, filter_columns]
+## FILTROS COMERCIAIS
+df_yrbuilt = read_data.copy()
+yr_built = df_yrbuilt.loc[df_yrbuilt['ano_construção'] <= filter_yr_built]
+data_yr_built = yr_built[['ano_construção', 'preço']].groupby('ano_construção').mean().reset_index()
+fig_yr_built = px.line(data_yr_built, x='ano_construção', y='preço')
 
-    df_map = data.copy()
-    st.sidebar.title(body='Filter map')
-    filter_waterfront = st.sidebar.selectbox(label='Waterfront',
-                                             options=df_map['waterfront'].unique())
-    filter_price = st.sidebar.slider(label='price',
-                                     min_value=int(df_map['price'].min()),
-                                     max_value=int(df_map['price'].max()),
-                                     step=1,
-                                     value=int(df_map['price'].mean())
-                                     )
-    price_zipcode = df_map[['price', 'zipcode']].groupby('zipcode').mean().reset_index()
-    filter_datageofile = geofile[geofile['ZIP'].isin(price_zipcode['zipcode'].tolist())]
-    filter_mapa = get_map(dataframe=df_map, df_choropleth=price_zipcode, filter_choropleth=filter_datageofile,
-                          filter1=filter_waterfront, filter2=filter_price)
-    mapa1, c1 = st.beta_columns((5, 1))
-    is_map = st.checkbox(label='Select map')
-    with mapa1:
-        if is_map:
-            folium_static(filter_mapa)
+df_bedrooms = read_data.copy()
+if filter_bedrooms:
+    df_bedrooms = df_bedrooms.loc[read_data['quartos'].isin(filter_bedrooms)]
+data_bedrooms_price = df_bedrooms[['preço', 'quartos']].groupby('quartos').mean().reset_index()
+data_bedrooms_count = df_bedrooms[['ID', 'quartos']].groupby('quartos').count().reset_index()
+data_bedrooms_count.columns = ['quartos', 'qtd']
+fig_bedrooms_mean = px.bar(data_bedrooms_price, x='quartos', y='preço')
+fig_bedrooms_count = px.bar(data_bedrooms_count, x='quartos', y='qtd')
 
-    filter_commercial()
+df_bathrooms = read_data.copy()
+if filter_bathrooms:
+    df_bathrooms = df_bathrooms.loc[read_data['banheiros'].isin(filter_bathrooms)]
+data_bathrooms_mean = df_bathrooms[['preço', 'banheiros']].groupby('banheiros').mean().reset_index()
+data_bathrooms_count = df_bathrooms[['ID', 'banheiros']].groupby('banheiros').count().reset_index()
+data_bathrooms_count.columns = ['banheiros', 'qtd']
+fig_bathrooms_mean = px.bar(data_bathrooms_mean, x='banheiros', y='preço')
+fig_bathrooms_count = px.bar(data_bathrooms_count, x='banheiros', y='qtd')
+
+df_floors = read_data.copy()
+if filter_floors:
+    df_floors = df_floors.loc[read_data['andares'].isin(filter_floors)]
+data_floors_mean = df_floors[['preço', 'andares']].groupby('andares').mean().reset_index()
+data_floors_count = df_floors[['ID', 'andares']].groupby('andares').count().reset_index()
+data_floors_count.columns = ['andares', 'qtd']
+fig_floors_mean = px.bar(data_floors_mean, x='andares', y='preço')
+fig_floors_count = px.bar(data_floors_count, x='andares', y='qtd')
+# CORPO
+st.title('Dataset')
+if st.checkbox('Mostrar tabela com os dados'):
+    st.write(df_data.head(100))
+
+load_map(map_data)
+
+st.title('Área comercial')
+st.plotly_chart(fig_yr_built)
+
+bedrooms1, bedrooms2 = st.beta_columns((1, 1))
+bedrooms1.plotly_chart(fig_bedrooms_mean, use_container_width=True)
+bedrooms2.plotly_chart(fig_bedrooms_count, use_container_width=True)
+
+bathrooms1, bathrooms2 = st.beta_columns((1, 1))
+bathrooms1.plotly_chart(fig_bathrooms_mean, use_container_width=True)
+bathrooms2.plotly_chart(fig_bathrooms_count, use_container_width=True)
+
+floors1, floors2 = st.beta_columns((1, 1))
+floors1.plotly_chart(fig_floors_mean, use_container_width=True)
+floors2.plotly_chart(fig_floors_count, use_container_width=True)
+
