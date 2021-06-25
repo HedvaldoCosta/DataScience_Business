@@ -2,6 +2,7 @@
   <img src="https://user-images.githubusercontent.com/67663958/122058746-4fbbf680-cdc2-11eb-9da7-8853ecf8894e.gif" width="600" />
 </p>
 
+### Link para a aplicação: < https://share.streamlit.io/hedvaldocosta/insight/main/kc_house/Aplicativo.py >
 ## Objetivo
 Utilizar a análise e manipulação de dados para auxiliar na tomada de decisões do time de negócios de uma empresa de imóveis denominada como Kc House
  
