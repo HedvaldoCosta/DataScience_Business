@@ -6,7 +6,7 @@ import folium
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 
-data = 'Datasets/kc_house_data.csv'
+data = 'https://raw.githubusercontent.com/HedvaldoCosta/Insight/main/kc_house/Datasets/kc_house_data.csv'
 
 
 @st.cache
@@ -163,4 +163,3 @@ bathrooms2.plotly_chart(fig_bathrooms_count, use_container_width=True)
 floors1, floors2 = st.beta_columns((1, 1))
 floors1.plotly_chart(fig_floors_mean, use_container_width=True)
 floors2.plotly_chart(fig_floors_count, use_container_width=True)
-
