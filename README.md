@@ -1,2 +1,15 @@
-## KcHouse
-### Construção de uma interface na web para analisar os preços dos imóveis à venda em Seattle.
+# Terminados
+
+## KC House
+```Encontrar uma forma para o seu time de negócios tomar uma melhor decisão para a compra e venda de casas em Seattle.```
+
+# Em andamento
+
+## All in One Place
+```Determinar quem são os clientes elegíveis para participar do programa de fidelidade.```
+
+## Insurance All
+```Segmentação de mercado para predizer que clientes podem estar interessados ou não no novo produto```
+
+## Top Bank
+```Aplicar churn dentro de uma grande empresa de serviços bancários```
