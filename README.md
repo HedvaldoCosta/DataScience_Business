@@ -13,3 +13,9 @@
 
 ## Top Bank
 ```Aplicar churn dentro de uma grande empresa de serviços bancários```
+
+## Blocker Fraud Company
+```Detecção de fraudes de transações feitas através de dispositivos móveis```
+
+## Cardio Catch Diseases
+```Criar uma ferramenta que aumente a precisão do diagnóstico de doenças cardiovasculares```
