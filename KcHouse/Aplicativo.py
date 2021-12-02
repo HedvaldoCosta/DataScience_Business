@@ -6,7 +6,7 @@ import folium
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 
-data = 'https://raw.githubusercontent.com/HedvaldoCosta/Insight/main/kc_house/Datasets/kc_house_data.csv'
+data = 'https://raw.githubusercontent.com/HedvaldoCosta/DataScience/main/KcHouse/Datasets/kc_house_data.csv'
 
 
 @st.cache
@@ -82,7 +82,8 @@ st.sidebar.title('Filtros da tabela')
 filter_columns = st.sidebar.multiselect('Selecione as colunas', df_data.columns)
 filter_cep = st.sidebar.multiselect('Selecione os CEPS', df_data['CEP'].unique().tolist())
 ## SIDEBAR MAPA
-map_data = read_data.copy()
+map_data = read_data[['beira_mar', 'latitude', 'longitude', 'ID', 'preço', 'quartos', 'banheiros', 'andares', 'area M2',
+                      'idade']].copy()
 st.sidebar.title('Filtros do mapa')
 filter_waterfront = st.sidebar.selectbox('Beira-Mar', map_data['beira_mar'].unique().tolist())
 filter_price = st.sidebar.slider('Preço', int(map_data['preço'].min()), int(map_data['preço'].max()),
@@ -152,14 +153,14 @@ load_map(map_data)
 st.title('Área comercial')
 st.plotly_chart(fig_yr_built)
 
-bedrooms1, bedrooms2 = st.beta_columns((1, 1))
+bedrooms1, bedrooms2 = st.columns((1, 1))
 bedrooms1.plotly_chart(fig_bedrooms_mean, use_container_width=True)
 bedrooms2.plotly_chart(fig_bedrooms_count, use_container_width=True)
 
-bathrooms1, bathrooms2 = st.beta_columns((1, 1))
+bathrooms1, bathrooms2 = st.columns((1, 1))
 bathrooms1.plotly_chart(fig_bathrooms_mean, use_container_width=True)
 bathrooms2.plotly_chart(fig_bathrooms_count, use_container_width=True)
 
-floors1, floors2 = st.beta_columns((1, 1))
+floors1, floors2 = st.columns((1, 1))
 floors1.plotly_chart(fig_floors_mean, use_container_width=True)
 floors2.plotly_chart(fig_floors_count, use_container_width=True)
