@@ -33,7 +33,6 @@ def read_data():
 
 # Função para construir o mapa
 def load_map(data):
-
     data_map = geopandas.read_file(geofile)
     mapa = folium.Map(location=[data['lat'].mean(), data['long'].mean()])
 
@@ -60,13 +59,15 @@ def load_map(data):
 dataframe_st = read_data()
 
 # sidebar
-show_dataframe = st.sidebar.checkbox('Mostrar tabela')
+st.sidebar.title('Localização e atributos')
+show_dataframe = st.sidebar.checkbox('Mostrar tabela', True)
 show_map = st.sidebar.checkbox('Mostrar mapa')
 filter_id = st.sidebar.multiselect('ID das casas', dataframe_st['id'].unique().tolist())
 filter_price = st.sidebar.slider('Preço das casas', int(dataframe_st['price'].min()), int(dataframe_st['price'].max()),
                                  int(dataframe_st['price'].mean()))
 filter_bedrooms = st.sidebar.selectbox('Número de quartos', dataframe_st['bedrooms'].sort_values().unique().tolist())
-filter_bathrooms = st.sidebar.selectbox('Número de banheiros', dataframe_st['bathrooms'].sort_values().unique().tolist())
+filter_bathrooms = st.sidebar.selectbox('Número de banheiros',
+                                        dataframe_st['bathrooms'].sort_values().unique().tolist())
 filter_waterfront = st.sidebar.selectbox('Beira-mar', dataframe_st['waterfront'].unique().tolist())
 
 # Plotando no corpo central do aplicativo
@@ -80,7 +81,11 @@ else:
 
 if show_dataframe:
     st.dataframe(dataframe_st)
-    st.sidebar.info(f'Total de {len(dataframe_st)} casas')
+    st.info(f'Total de {len(dataframe_st)} casas')
 
-if show_map:
+if (show_map == True) & (show_dataframe == True):
+    load_map(data=dataframe_st[['id', 'zipcode', 'lat', 'long', 'price', 'bedrooms', 'bathrooms', 'waterfront']])
+
+if (show_map == True) & (show_dataframe == False):
+    st.info(f'Total de {len(dataframe_st)} casas')
     load_map(data=dataframe_st[['id', 'zipcode', 'lat', 'long', 'price', 'bedrooms', 'bathrooms', 'waterfront']])
