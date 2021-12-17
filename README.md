@@ -1,9 +1,5 @@
-# Terminados
-
 ## KC House
 ```Encontrar uma forma para o seu time de negócios tomar uma melhor decisão para a compra e venda de casas em Seattle.```
-
-# Em andamento
 
 ## All in One Place
 ```Determinar quem são os clientes elegíveis para participar do programa de fidelidade.```
