@@ -50,8 +50,8 @@ def load_map(data):
     data_map = data_map[data_map['ZIP'].isin(data['zipcode'].tolist())]
     folium.Choropleth(geo_data=data_map, data=df, columns=['zipcode', 'price'], key_on='feature.properties.ZIP',
                       fill_color='YlOrRd',
-                      fill_opacity=0.7,
-                      line_opacity=0.2).add_to(mapa)
+                      fill_opacity=0.9,
+                      line_opacity=0.4).add_to(mapa)
     return folium_static(mapa)
 
 
