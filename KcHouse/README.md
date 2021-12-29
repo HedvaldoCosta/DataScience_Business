@@ -6,6 +6,10 @@
 
 https://share.streamlit.io/hedvaldocosta/datascience/main/KcHouse/App.py
 
+### Relatório 
+https://app.powerbi.com/view?r=eyJrIjoiNWRjMzM4MTktZjA0NS00NzAyLTk1OGUtMmNjNzVlYWY1MzUyIiwidCI6ImU0NmMwZTRiLThhY2YtNDMyZC05NjE3LWM4ZWJmNDdlMjY3NSJ9
+
+
 
 # Resumo do problema
 
@@ -34,9 +38,3 @@ Você é um Data Scientist contratado pela empresa para ajudar a encontrar as me
 # Planejamento da solução
 
 Retirando os dados do kaggle (https://www.kaggle.com/shivachandel/kc-house-data), e importando no Jupyter Notebook para fazer a análise exploratória de dados, é possível criar insights para um melhor desenvolvimento da solução e descobrir dados que tendem a ser desnecessários para a aplicação. Aplicando a limpeza e transformação dos dados, que irão aprimorar o que necessitamos para resolver o problema, a partir do pycharm, e selecionando os melhores atributos, levando em conta o que é pedido, é possível construir um relatório utilizando mapa e filtros que sejam colocados em produção no Streamlit, assim, facilitando a tomada de decisão.
-
-
-
-# Conclusões
-
-[...]
