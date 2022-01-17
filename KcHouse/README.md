@@ -1,3 +1,6 @@
+![2022-01-17-19-53-36](https://user-images.githubusercontent.com/67663958/149845434-135dc4b3-46e2-4c44-a361-4ff156c6b73a.gif)
+
+
 ### Referência do problema: 
 
 ### https://sejaumdatascientist.com/os-5-projetos-de-data-science-que-fara-o-recrutador-olhar-para-voce/
