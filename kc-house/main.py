@@ -55,7 +55,7 @@ def load_map(data):
     return folium_static(mapa)
 
 
-# carregando e transformando as variaveis
+# Carregando e transformando as variaveis
 dataframe_st = read_data()
 
 # sidebar
