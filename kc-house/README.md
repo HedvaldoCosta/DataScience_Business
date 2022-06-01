@@ -1,13 +1,9 @@
 ![2022-01-17-19-53-36](https://user-images.githubusercontent.com/67663958/149845434-135dc4b3-46e2-4c44-a361-4ff156c6b73a.gif)
 
 
-### Referência do problema: 
-
-### https://sejaumdatascientist.com/os-5-projetos-de-data-science-que-fara-o-recrutador-olhar-para-voce/
-
 ### Aplicação construída para a resolução:
 
-https://share.streamlit.io/hedvaldocosta/datascience/main/kc-house/main.py
+https://share.streamlit.io/hedvaldocosta/datascience_business/main/kc-house/main.py
 
 ### Relatório 
 https://app.powerbi.com/view?r=eyJrIjoiNWRjMzM4MTktZjA0NS00NzAyLTk1OGUtMmNjNzVlYWY1MzUyIiwidCI6ImU0NmMwZTRiLThhY2YtNDMyZC05NjE3LWM4ZWJmNDdlMjY3NSJ9&pageName=ReportSection
